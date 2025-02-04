@@ -129,6 +129,6 @@ El proyecto consiste en el diseño e implementación del juego clásico Tetris u
 
 - VGA Retro Sprites and Sound Synthesis - DE0-NANO (https://www.fpgalover.com/boards/de0-nano/89-vga-retro-sprites-and-sound-synthesis)
 
-- Implementación de Tetris en FPGA - MIT (https://fpga.mit.edu/videos/2019/team26/presentation.pdf)
+- Implementación de diferentes proyectos en FPGA - MIT (https://fpga.mit.edu/6205/F24/final_project_archive)
 
 - Tetris on FPGA - Pascal Heinen DutLUG (https://www.youtube.com/watch?v=6E06bwA18ik)
