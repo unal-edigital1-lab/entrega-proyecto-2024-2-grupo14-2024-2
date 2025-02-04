@@ -89,6 +89,8 @@ El proyecto consiste en el diseño e implementación del juego clásico Tetris u
 
 - Calcula y almacena el puntaje y nivel del jugador.
 
+![Block Diagram_page-0001](https://github.com/user-attachments/assets/8421de1f-50f5-41f9-bbfc-5058caa3b4fa)
+
 ## Plan de Trabajo
 
 **Semana 1:**
