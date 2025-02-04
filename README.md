@@ -91,7 +91,7 @@ El proyecto consiste en el diseño e implementación del juego clásico Tetris u
 
 ## Diagrama de Bloques
   
-![Block Diagram_page-0001](https://github.com/user-attachments/assets/8421de1f-50f5-41f9-bbfc-5058caa3b4fa)
+![image](https://github.com/user-attachments/assets/16e0f57b-bdc9-4e8a-9f5b-a4ca5bcd0c87)
 
 ## Plan de Trabajo
 
