@@ -293,3 +293,4 @@ endmodule
 - Implementación de diferentes proyectos en FPGA - MIT (https://fpga.mit.edu/6205/F24/final_project_archive)
 
 - Tetris on FPGA - Pascal Heinen DutLUG (https://www.youtube.com/watch?v=6E06bwA18ik)
+- baliika/fpga-tetris (https://github.com/baliika/fpga-tetris)
