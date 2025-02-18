@@ -1,1 +1,0 @@
-Info (10281): Verilog HDL Declaration information at spi.v(95): object "CMD_READ" differs only in case from object "cmd_read" in the same scope File: C:/Users/diego/Documents/Laboratorio_Digital/Proyecto/project/src/spi.v Line: 95
