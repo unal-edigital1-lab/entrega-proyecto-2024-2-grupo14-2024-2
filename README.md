@@ -237,7 +237,52 @@ end
 endmodule
 
 ```
+A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del talbero es de 40. 
 
+```Verilog
+always @(posedge clk) begin
+    if (rst) begin
+        px_wr <= 0;
+        fase_dibujo <= 0;  
+    end else if (((pos_x != pos_old_x) || (pos_y != pos_old_y)) &&
+                 (pos_x >= LIMITE_X_MIN) && (pos_x <= LIMITE_X_MAX) &&
+                 (pos_y >= LIMITE_Y_MIN) && (pos_y <= LIMITE_Y_MAX)) begin
+        
+        if (fase_dibujo == 0) begin
+            // Borra la posición anterior
+            mem_px_addr <= pos_old_x + (pos_old_y * ANCHO_TABLERO);
+            mem_px_data <= 3'b000; // Negro (borrar)
+            fase_dibujo <= 1;  
+        end else begin
+            // Dibuja en la nueva posición
+            mem_px_addr <= pos_x + (pos_y * ANCHO_TABLERO);    
+            mem_px_data <= 3'b100; // Rojo (dibujar)
+            pos_old_x <= pos_x;
+            pos_old_y <= pos_y;
+            fase_dibujo <= 0;  
+        end
+        px_wr <= 1;  
+    end else begin
+        px_wr <= 0;
+    end
+end
+```
+
+Otra función fundamental del fsm es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_RAM se implementó un módulo de lectura exclusivo para FSM.
+
+```Verilog
+always @(posedge clk) begin 
+    if (move_down && !move_right && !move_left && !move_up) begin
+        mem_px_read_addr <= pos_x + ((pos_y+1) * ANCHO_TABLERO);
+    end else if (move_up && !move_right && !move_left && !move_down) begin
+        mem_px_read_addr <= pos_x + ((pos_y-1) * ANCHO_TABLERO);
+    end else if (move_right && !move_up && !move_down && !move_left) begin
+        mem_px_read_addr <= (pos_x+1) + (pos_y * ANCHO_TABLERO);
+    end else if (move_left && !move_up && !move_down && !move_right) begin
+        mem_px_read_addr <= (pos_x-1) + (pos_y * ANCHO_TABLERO);
+    end
+end
+```
 ## Referencias
 
 - [1] FPGA Cyclone IV - Conector VGA. (2024, July 16). parsek.com.co. (https://parsek.com.co/blogs/fpga-cyclone-iv-conector-vga)
