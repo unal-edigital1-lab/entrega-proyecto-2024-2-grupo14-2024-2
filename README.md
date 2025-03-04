@@ -184,9 +184,10 @@ Durante la investigación y desarrollo del proyecto, exploramos dos enfoques dis
 El primer enfoque, utilizado en el juego de Snake, almacena toda la información relevante sobre el estado del juego dentro del módulo game_logic, lo que significa que las posiciones de la serpiente, la manzana y las colisiones se manejan mediante lógica combinacional. Si bien esto simplifica la estructura del diseño al eliminar la necesidad de memoria adicional, incrementa significativamente la cantidad de compuertas lógicas utilizadas en la FPGA, lo que puede afectar el rendimiento y la escalabilidad del sistema.
 
 En contraste, el segundo enfoque, aplicado a los puzzles/laberintos, introduce un buffer RAM para almacenar el escenario del juego. Este buffer RAM permite que la lógica de colisiones y movimiento acceda a los datos mediante lecturas de memoria en lugar de depender de lógica combinacional compleja. Este diseño tiene varias ventajas:
-✔ Reduce el uso de compuertas lógicas en la FPGA, permitiendo un uso más eficiente de los recursos.
-✔ Facilita la manipulación del escenario, ya que los datos pueden actualizarse fácilmente en memoria sin necesidad de modificar la estructura del código principal.
-✔ Permite almacenar múltiples niveles o mapas, haciendo que la implementación de nuevos escenarios sea más flexible y escalable.
+
+ - Reduce el uso de compuertas lógicas en la FPGA, permitiendo un uso más eficiente de los recursos.
+ - Facilita la manipulación del escenario, ya que los datos pueden actualizarse fácilmente en memoria sin necesidad de modificar la estructura del código principal.
+ - Permite almacenar múltiples niveles o mapas, haciendo que la implementación de nuevos escenarios sea más flexible y escalable.
 </div>
 
 A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
