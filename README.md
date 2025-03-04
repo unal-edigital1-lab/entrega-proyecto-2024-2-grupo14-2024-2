@@ -3,11 +3,11 @@
 
 ## Introducción
 
-El proyecto consiste en el diseño e implementación del juego clásico Tetris utilizando una FPGA. Este proyecto tiene como objetivo combinar el aprendizaje de lógica digital, diseño hardware y generación de gráficos en tiempo real. La FPGA se encargará de gestionar la lógica del juego, renderizar los gráficos y recibir entradas del usuario.
+El proyecto consiste en el diseño e implementación del juego clásico Snake utilizando una FPGA. Este proyecto tiene como objetivo combinar el aprendizaje de lógica digital, diseño hardware y generación de gráficos en tiempo real. La FPGA se encargará de gestionar la lógica del juego, renderizar los gráficos y recibir entradas del usuario.
 
 ## Objetivos
 
-- Implementar la lógica del juego de Tetris (generación de piezas, movimiento, rotación y colisiones).
+- Implementar la lógica del juego de Snake (generación de la serpiente y las manzanas, movimiento, rotación y colisiones).
 
 - Diseñar una interfaz gráfica sencilla utilizando una salida VGA.
 
@@ -21,27 +21,25 @@ El proyecto consiste en el diseño e implementación del juego clásico Tetris u
 
 1. **Tablero:**
 
-- Dimensiones: 10 columnas x 20 filas.
+- Dimensiones: 40 columnas x 30 filas.
 
 - Representación en memoria interna de la FPGA mediante una matriz de bits.
 
-2. **Piezas:**
+2. **Serpiente:**
 
-- Siete piezas típicas de Tetris almacenadas como configuraciones predefinidas en ROM.
+- Objeto móvil que se alarga según la cantidad de manzanas que consume.
 
 3. **Comportamiento:**
 
-- Movimiento horizontal (izquierda/derecha).
+- Movimiento en cruz a lo largo del tablero (arriba, abajo, izquierda, derecha).
 
-- Rotación en sentido horario.
+- Generación de manzanas en posiciones al azar.
 
-- Descenso automático con velocidad ajustable.
-
-- Eliminación de filas completas.
+- Al comer una manzana, se incrementa el tamaño de la serpiente y la puntuación.
 
 4. **Puntaje y niveles:**
 
-- Incremento de puntos por filas eliminadas.
+- Incremento de puntos por manzanas consumidas.
 
 - Aumento de velocidad a medida que suben los niveles.
 
@@ -49,25 +47,21 @@ El proyecto consiste en el diseño e implementación del juego clásico Tetris u
 
 1. **Salida VGA:**
 
-- Representación del tablero y piezas con bloques de colores.
+- Representación de la serpiente y la manzana con bloques de colores.
 
 2. **Visualización:**
 
 - Tablero de juego.
 
-- Puntaje actual y nivel.
-
-- Próxima pieza a aparecer.
+- Puntaje actual.
 
 ### Entradas del Usuario
 
 1. **Botones:**
 
-- Arriba: Rotar pieza.
+- Arriba/Abajo/Izquierda/Derecha: Mover pieza.
 
-- Izquierda/Derecha: Mover pieza.
-
-- Abajo: Acelerar descenso.
+- Reset: Reiniciar Juego.
 
 ### Módulos Principales
 
@@ -92,36 +86,6 @@ El proyecto consiste en el diseño e implementación del juego clásico Tetris u
 ## Diagrama de Bloques
   
 ![image](https://github.com/user-attachments/assets/16e0f57b-bdc9-4e8a-9f5b-a4ca5bcd0c87)
-
-## Plan de Trabajo
-
-**Semana 1:**
-
-- Investigación y diseño inicial del proyecto.
-
-- Configuración del entorno de desarrollo.
-
-**Semana 2:**
-
-- Implementación del módulo VGA.
-
-- Generación del tablero en la salida VGA.
-
-**Semana 3:**
-
-- Implementación de la lógica de control de piezas.
-
-- Pruebas de movimiento y rotación de piezas.
-
-**Semana 4:**
-
-- Implementación del sistema de puntaje y niveles.
-
-- Integración de todos los módulos.
-
-**Semana 5:**
-
-- Pruebas finales y depuración.
 
 # 10 de Febrero: Pruebas VGA  
 <div align="justify">
