@@ -3,10 +3,16 @@
 
 ## Introducción
 <div align="justify">
-Como etapa final del curso Electrónica Digital I, se busca desafíar y probar nuestros conocimientos en la integración de los fundamentos y aplicaciones avanzadas en sistemas de electrónica digital. Se abarcan temas claves como, diseño e implementación de circuitos secuenciales y combinacionales, máquinas de estados algorítmos, uso de entornos de simulación y programación de Hardware en Verilog. Es así, como para la aplicación de estos conocimientos, se planteó en un inicio la recreación de un juego retro con la placa Cyclone IV. 
-//
-Como objetivo principal, es dar solución a los retos que presenta la programación de videjuegos en un lenguaje de programación de bajo nivel. Como el procesamiento de señales en VGA, creación de registros de memoria RAM y lógica combinacional para mecánicas de movimiento. Además, se integran otros componentes, como botones y switches para dar al usuario una interacción con el juego en tiempo de ejecución.
+Como etapa final del curso Electrónica Digital I, este proyecto busca desafiar y poner a prueba nuestros conocimientos en la integración de fundamentos y aplicaciones avanzadas de la electrónica digital. Se abordan temas clave como el diseño e implementación de circuitos secuenciales y combinacionales, máquinas de estados algorítmicas, uso de entornos de simulación y programación en Verilog. 
+
+Para aplicar estos conocimientos, se planteó inicialmente la recreación de un juego retro en la placa Cyclone IV.
+
+<br><br>
+
+El objetivo principal es resolver los retos que presenta la programación de videojuegos en un lenguaje de bajo nivel, abarcando aspectos como el procesamiento de señales VGA, la creación de registros de memoria RAM y la implementación de lógica combinacional para las mecánicas de movimiento. Además, se integran otros componentes, como botones y switches, para permitir la interacción del usuario con el juego en tiempo real.
 </div>
+
+
 ## Especificaciones del Proyecto
 
 ### Lógica del Juego
