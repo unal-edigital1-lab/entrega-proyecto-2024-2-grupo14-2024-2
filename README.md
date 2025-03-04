@@ -18,7 +18,7 @@ El objetivo principal es resolver los retos que presenta la programación de vid
 
 ### Dificultades de Desarrollo
 <div align="justify">
-A lo largo del desarrollo del proyecto, nos enfrentamos a diversas dificultades que influyeron en la evolución de nuestra propuesta inicial. En un principio, se planteó la recreación del videojuego Tetris; sin embargo, la limitada capacidad de memoria en la FPGA presentó un desafío significativo. Para mitigar este problema, intentamos implementar un factor de escalamiento que redujera el espacio requerido para almacenar las piezas del juego. A pesar de estos esfuerzos, las restricciones de hardware hicieron inviable la ejecución eficiente del Tetris, por lo que optamos por una lógica más sencilla: el clásico juego de la serpiente (Snake), donde la longitud del personaje aumenta en función de los elementos recolectados.
+A lo largo del desarrollo del proyecto, nos enfrentamos a diversas dificultades que influyeron en la evolución de nuestra propuesta inicial. En un principio, se planteó la recreación del videojuego Tetris; sin embargo, la limitada capacidad de memoria en la FPGA presentó un desafío significativo. Para mitigar este problema, intentamos implementar un factor de escalamiento que redujera el espacio requerido para almacenar las piezas del juego. A pesar de estos esfuerzos, las restricciones de hardware y la ausencia de tiempo hicieron inviable la ejecución eficiente del Tetris, por lo que optamos por una lógica más sencilla: el clásico juego de la serpiente (Snake), donde la longitud del personaje aumenta en función de los elementos recolectados.
 <br> 
 No obstante, el desarrollo del Snake también presentó desafíos. Aunque la lógica del juego parecía estar bien estructurada, la primera versión del movimiento utilizaba un método de sincronización y actualización de reloj sin requerir memoria RAM, lo que afectaba la interacción y fluidez del juego. Para abordar este problema y comprender mejor las mecánicas de movimiento, realizamos pruebas con puzles tipo laberinto, donde desarrollamos una interfaz gráfica basada en un buffer RAM y diseñamos la lógica de colisiones y desplazamiento.
 </div>
@@ -27,7 +27,7 @@ No obstante, el desarrollo del Snake también presentó desafíos. Aunque la ló
 
 1. **Tablero:**
 
-- Dimensiones: 40 columnas x 30 filas.
+- Dimensiones: Una cuadrícula de 40 x 30 celdas.
 
 - Representación en memoria interna de la FPGA mediante una matriz de bits.
 
@@ -43,11 +43,9 @@ No obstante, el desarrollo del Snake también presentó desafíos. Aunque la ló
 
 - Al comer una manzana, se incrementa el tamaño de la serpiente y la puntuación.
 
-4. **Puntaje y niveles:**
+4. **Puntaje:**
 
 - Incremento de puntos por manzanas consumidas.
-
-- Aumento de velocidad a medida que suben los niveles.
 
 ### Interfaz Gráfica
 
@@ -57,7 +55,7 @@ No obstante, el desarrollo del Snake también presentó desafíos. Aunque la ló
 
 2. **Visualización:**
 
-- Tablero de juego.
+- Cuadrícula de juego.
 
 - Puntaje actual.
 
@@ -65,33 +63,41 @@ No obstante, el desarrollo del Snake también presentó desafíos. Aunque la ló
 
 1. **Botones:**
 
-- Arriba/Abajo/Izquierda/Derecha: Mover pieza.
+- Arriba/Abajo/Izquierda/Derecha: Movimiento de la serpiente.
 
 - Reset: Reiniciar Juego.
 
-### Módulos Principales
+### Módulos del juego
 
-1. **Módulo de Control:**
+1. **Generación de números aleatorios:**
 
-- Gestiona las entradas del usuario y actualiza el estado del juego.
+El módulo `random_num_gen.v` se encarga de enviar las coordenadas donde aparecerá la manzana en el juego. Para ello, utiliza un registro de desplazamiento con retroalimentación lineal, implementado en `LFSR.v`.
 
-2. **Módulo VGA:**
+2. **Manejo del reloj:**
 
-- Genera las señales de sincronización.
+`VGA_clk.v` toma como entrada una señal de 50 MHz y la divide a 25 MHz para sincronizar la señal VGA.
+`game_upd_clk.v` genera un pulso periódico que regula la velocidad de actualización del juego.
 
-- Renderiza el tablero y las piezas.
+3. **Generación de la señal VGA:**
 
-3. **Módulo de Piezas:**
+`VGA_Draw.v` determina el color de cada píxel según la posición y el objeto que se encuentra en ese punto.
+`VGA_Ctrl.v` gestiona la señal de control necesaria para la salida VGA.
 
-- Controla la generación y movimiento de las piezas.
+4. **Visualización de la puntuación:**
 
-4. **Módulo de Puntaje:**
+`SSEG_Display.v` se encarga de mostrar la puntuación del jugador en un display de 7 segmentos.
 
-- Calcula y almacena el puntaje y nivel del jugador.
+5. **Captura de la dirección de movimiento:**
+
+`direction_input.v` lee la entrada de los botones para determinar la dirección en la que se moverá la serpiente.
+
+6. **Lógica principal del juego:**
+
+`game_logic.v` contiene las reglas del juego. Controla el movimiento de la serpiente, detecta colisiones que pueden hacer que el jugador pierda, y actualiza la puntuación cuando la serpiente come una manzana.
 
 ## Diagrama de Bloques
   
-![image](https://github.com/user-attachments/assets/16e0f57b-bdc9-4e8a-9f5b-a4ca5bcd0c87)
+![image](https://github.com/user-attachments/assets/c7214819-4518-43b9-934b-9ef9c73750c2)
 
 # Pruebas Iniciales VGA
 <div align="justify">
@@ -190,35 +196,7 @@ En contraste, el segundo enfoque, aplicado a los puzzles/laberintos, introduce u
  - Permite almacenar múltiples niveles o mapas, haciendo que la implementación de nuevos escenarios sea más flexible y escalable.
 </div>
 
-### Métodos de Escalamiento y Optimización
-
-En el desarrollo del proyecto, enfrentamos un desafío clave: el almacenamiento y procesamiento de la información gráfica en la FPGA. Para representar una pantalla VGA de 640x480 píxeles con 3 bits de color por píxel (RGB 111), el tamaño total de la memoria requerida sería:
-
-640×480×3 bits=921,600 bits=115,200 bytes≈112.5 KB
-
-Este requerimiento de memoria aumenta la complejidad lógica del juego, por lo que se decide minizar resolución y simplificar su arquitectura.
-
-#### Método de Representación con Macros (define.vh) – Snake
-En el juego de Snake, no se utiliza una memoria externa para almacenar el estado del juego. En su lugar:
-
- - Las posiciones de la serpiente y la comida se almacenan directamente en la lógica combinacional dentro del módulo game_logic.
- - El escalamiento se maneja en el archivo define.vh, donde se define una cuadrícula de 40x30 celdas, reduciendo así el número de posiciones que deben ser rastreadas.
- - Cada celda tiene un tamaño de 16x16 píxeles, lo que disminuye la cantidad de cálculos y almacenamiento.
-
-#### Método de Buffer RAM – Puzzles/Laberintos
-Para los puzzles/laberintos, en lugar de gestionar las posiciones mediante lógica combinacional, se implementó un buffer RAM de doble puerto (buffer_ram_dp). En este método:
-
- - El escenario del juego se almacena en memoria, lo que permite una mejor manipulación de los niveles.
-
- - Se accede a la memoria mediante direcciones de lectura y escritura, lo que facilita la actualización de los gráficos en pantalla.
-
- - La memoria se divide en "celdas", cada una representando un área de 16x16 píxeles, reduciendo el espacio de memoria en un factor de 16:
-
-  640×480 = 40×30 = 1200 celdas
-
-Esto significa que, en lugar de manejar 307,200 bytes de información para 640x480 píxeles en color, solo se requiere 7.5 KB de memoria para manejar la cuadrícula.
-
-A continuación nos centraremos en el módulo fsm_game. Este es el cerebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
+A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
 
 ```Verilog
 always @(posedge clk) begin
@@ -249,7 +227,7 @@ always @(posedge clk) begin
 end
 ```
 
-Otra función fundamental del módulo es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_ram se implementó un puerto de lectura exclusivo para FSM, y se programó el bloque que se presentaa continuación:
+Otra función fundamental del fsm es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_ram se implementó un puerto de lectura exclusivo para FSM, y se programó el bloque que se presentaa continuación:
 
 ```Verilog
 always @(posedge clk) begin 
@@ -282,7 +260,7 @@ always @(posedge clk_game) begin
     end
 end
 ```
-También es importante mencionar que se observó que al presionar varios botones al tiempo o rápidamente se rompia el condiciional permitiendo al jugador atravesar paredes en rápida sucesión. Por esto fue necesario agregar la condición de que todas las demás entradas de movimiento debían estar en 0. 
+También es importante mencionar que se observó que al presionar varios botones al tiempo o rápidamente se rompía el condicional permitiendo al jugador atravesar paredes en rápida sucesión. Por esto fue necesario agregar la condición de que todas las demás entradas de movimiento debían estar en 0. 
 ## Referencias
 
 - [1] FPGA Cyclone IV - Conector VGA. (2024, July 16). parsek.com.co. (https://parsek.com.co/blogs/fpga-cyclone-iv-conector-vga)
