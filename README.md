@@ -12,7 +12,18 @@ El objetivo principal es resolver los retos que presenta la programación de vid
 </div>
 
 
-## Especificaciones del Proyecto
+## Componentes Interactivos
+- Switch: Funcionará como un interruptor de encendido, al estar en el estado 1, permitirá la transmisión de la señal VGA.
+- Botones: Asociados al movimiento del cuadro, permite al usuario moverse por 4 direcciones.
+- Display: Aquí se mostrará el puntaje obtenido durante la partida.
+
+### Dificultades de Desarrollo
+<div align="justify">
+A lo largo del desarrollo del proyecto, nos enfrentamos a diversas dificultades que influyeron en la evolución de nuestra propuesta inicial. En un principio, se planteó la recreación del videojuego Tetris; sin embargo, la limitada capacidad de memoria en la FPGA presentó un desafío significativo. Para mitigar este problema, intentamos implementar un factor de escalamiento que redujera el espacio requerido para almacenar las piezas del juego. A pesar de estos esfuerzos, las restricciones de hardware hicieron inviable la ejecución eficiente del Tetris, por lo que optamos por una lógica más sencilla: el clásico juego de la serpiente (Snake), donde la longitud del personaje aumenta en función de los elementos recolectados.
+<br> 
+No obstante, el desarrollo del Snake también presentó desafíos. Aunque la lógica del juego parecía estar bien estructurada, la primera versión del movimiento utilizaba un método de sincronización y actualización de reloj sin requerir memoria RAM, lo que afectaba la interacción y fluidez del juego. Para abordar este problema y comprender mejor las mecánicas de movimiento, realizamos pruebas con puzles tipo laberinto, donde desarrollamos una interfaz gráfica basada en un buffer RAM y diseñamos la lógica de colisiones y desplazamiento.
+</div>
+
 
 ### Lógica del Juego
 
@@ -84,69 +95,22 @@ El objetivo principal es resolver los retos que presenta la programación de vid
   
 ![image](https://github.com/user-attachments/assets/16e0f57b-bdc9-4e8a-9f5b-a4ca5bcd0c87)
 
-# 10 de Febrero: Pruebas VGA  
+# Pruebas Iniciales VGA
 <div align="justify">
-La implementación gráfica se realiza a través del puerto VGA de nuestra tarjeta Cyclone IV. Es fundamental definir qué parámetros podemos modificar y cuáles son nuestras limitaciones.
+Pruebas iniciales en VGA
 
-En primer lugar, el conector VGA es una interfaz de pantalla utilizada para transmitir señales de video analógicas. Para facilitar su proyección en dispositivos más modernos, se emplea un adaptador VGA a HDMI, permitiendo visualizar los resultados como una salida digital.
+Como primer paso en nuestra investigación, realizamos pruebas para generar señales de video VGA en la FPGA. Para ello, utilizamos repositorios de GitHub como referencia y adaptamos sus implementaciones a nuestro entorno de trabajo[1].
 
-Luego, según el datasheet de nuestra tarjeta, en el apartado Pin Planner se observa que cada canal de color del formato RGB cuenta con únicamente 1 bit de información, lo que limita la gama de colores a 8 posibles combinaciones.
+Uno de los primeros aspectos a definir fueron los pulsos de sincronización horizontal y vertical, los cuales son esenciales para que la pantalla pueda interpretar correctamente la imagen enviada por la FPGA. Además, establecimos los parámetros necesarios para definir la resolución de la pantalla en 640x480 píxeles a 60 Hz, asegurándonos de incluir señales adicionales como los porches delantero y trasero, que permiten una transición adecuada entre cada cuadro de imagen.
+<br>
+A partir del datasheet de la placa Cyclone IV, identificamos que los canales de color para VGA están limitados a 3 bits de información (1 bit por cada canal RGB: rojo, verde y azul). Esto restringe la paleta de colores a solo 8 combinaciones posibles, lo cual influyó en la forma en que representamos gráficos dentro del juego.
 
-Finalmente, dado que la pantalla requiere una frecuencia de 60 Hz para su correcto funcionamiento, se ejecuta el siguiente código [1], el cual permite generar diferentes patrones de color (barras horizontales, barras verticales, tablero de ajedrez y tablero de ajedrez invertido), evaluando así su sincronización con la pantalla digital.
+Para validar el correcto funcionamiento de la señal VGA, implementamos un código de prueba que genera patrones de color en la pantalla, permitiendo verificar que los pulsos de sincronización y la asignación de colores funcionaran correctamente.
 </div>
 
+#### Contadores de Píxeles y Líneas
+
 ```Verilog
-module VGA(
-   clock,          // Reloj de 50 MHz de la FPGA
-   switch,         // Switch para seleccionar el patrón de colores
-   disp_RGB,       // Salida de color VGA (3 bits: Rojo, Verde, Azul)
-   hsync,          // Señal de sincronización horizontal
-   vsync           // Señal de sincronización vertical
-);
-
-input  clock;       // Entrada del reloj de la FPGA (50MHz)
-input  [1:0]switch; // Entrada del switch (2 bits para seleccionar patrón)
-output [2:0]disp_RGB; // Salida de color VGA (1 bit por canal RGB)
-output  hsync;     // Salida de sincronización horizontal
-output  vsync;     // Salida de sincronización vertical
-
-// ----------------------------- Definición de Registros -----------------------------
-
-reg [9:0] hcount;  // Contador para el escaneo horizontal (posición en la línea)
-reg [9:0] vcount;  // Contador para el escaneo vertical (línea en la pantalla)
-reg [2:0] data;    // Registra el color actual en pantalla
-reg [2:0] h_dat;   // Color de barras horizontales
-reg [2:0] v_dat;   // Color de barras verticales
-
-reg   flag;         // Bandera auxiliar (No utilizada en el código final)
-wire  hcount_ov;    // Señal de desbordamiento del contador horizontal
-wire  vcount_ov;    // Señal de desbordamiento del contador vertical
-wire  dat_act;      // Indica si el píxel actual está en la zona visible
-reg  vga_clk;       // Reloj reducido para VGA
-
-// ----------------------------- Generación del Reloj VGA -----------------------------
-
-always @(posedge clock)
-begin
-    vga_clk = ~vga_clk; // Reduce la frecuencia del reloj (50MHz -> 25MHz)
-end
-
-// ----------------------------- Definición de los Parámetros VGA -----------------------------
-// Valores de sincronización para 640x480 @ 60Hz
-
-parameter hsync_end   = 10'd95,   // Duración del pulso de sincronización horizontal
-          hdat_begin  = 10'd143,  // Inicio del área visible en horizontal
-          hdat_end    = 10'd783,  // Fin del área visible en horizontal
-          hpixel_end  = 10'd799,  // Número total de píxeles por línea (800)
-
-          vsync_end   = 10'd1,    // Duración del pulso de sincronización vertical
-          vdat_begin  = 10'd34,   // Inicio del área visible en vertical
-          vdat_end    = 10'd514,  // Fin del área visible en vertical
-          vline_end   = 10'd524;  // Número total de líneas por cuadro (525)
-
-// ----------------------------- Contador de Píxeles y Líneas -----------------------------
-
-// Contador horizontal (avanza los píxeles en una línea)
 always @(posedge vga_clk)
 begin
     if (hcount_ov)
@@ -156,7 +120,6 @@ begin
 end
 assign hcount_ov = (hcount == hpixel_end); // Detecta cuando se alcanza el final de la línea
 
-// Contador vertical (avanza las líneas en la pantalla)
 always @(posedge vga_clk)
 begin
     if (hcount_ov) // Solo avanza cuando se completa una línea
@@ -168,23 +131,33 @@ begin
     end
 end
 assign  vcount_ov = (vcount == vline_end); // Detecta cuando se alcanza el final de la pantalla
+```
+Estos bloques generan los contadores de posición horizontal y vertical:
 
-// ----------------------------- Generación de las Señales de Sincronización -----------------------------
+- hcount se incrementa con cada pulso de vga_clk hasta llegar a 799 píxeles.
+- Cuando hcount llega al final de la línea (hpixel_end), se reinicia y se incrementa vcount.
+- vcount cuenta las líneas de la pantalla hasta alcanzar 524 líneas, tras lo cual se reinicia.
 
-// Define el área visible de la pantalla (dentro de 640x480)
+Esto simula el escaneo progresivo de la imagen en la pantalla.
+<br>
+
+#### Generación de las Señales de Sincronización VGA 
+```Verilog
 assign dat_act =    ((hcount >= hdat_begin) && (hcount < hdat_end)) &&
                     ((vcount >= vdat_begin) && (vcount < vdat_end));
 
-// Generación de señales de sincronización VGA
 assign hsync = (hcount > hsync_end); // Pulso de sincronización horizontal
 assign vsync = (vcount > vsync_end); // Pulso de sincronización vertical
 
-// Asigna el color solo cuando está en la zona visible, en caso contrario, muestra negro
 assign disp_RGB = (dat_act) ? data : 3'h00; 
+```
+- dat_act determina si el píxel actual está en la zona visible de la pantalla.
+- hsync y vsync generan los pulsos de sincronización para la pantalla VGA.
+- disp_RGB muestra el color del píxel solo si está en la zona visible, de lo contrario, lo pone en negro (3'h00).
+<br>
 
-// ----------------------------- Generación de Patrones de Color -----------------------------
-
-// Selecciona el patrón de color según el switch
+#### Generación de Patrones de Color
+```Verilog
 always @(posedge vga_clk)
 begin
     case(switch[1:0])
@@ -194,54 +167,13 @@ begin
         2'd3: data <= (v_dat ~^ h_dat); // Patrón de tablero invertido (XNOR)
     endcase
 end
-
-// ----------------------------- Definición de Barras de Color -----------------------------
-
-// Genera barras de colores verticales
-always @(posedge vga_clk)  
-begin
-    if(hcount < 223)
-        v_dat <= 3'h7;   // Blanco
-    else if(hcount < 303)
-        v_dat <= 3'h6;   // Cian
-    else if(hcount < 383)
-        v_dat <= 3'h5;   // Magenta
-    else if(hcount < 463)
-        v_dat <= 3'h4;   // Azul
-    else if(hcount < 543)
-        v_dat <= 3'h3;   // Amarillo
-    else if(hcount < 623)
-        v_dat <= 3'h2;   // Verde
-    else if(hcount < 703)
-        v_dat <= 3'h1;   // Rojo
-    else 
-        v_dat <= 3'h0;   // Negro
-end
-
-// Genera barras de colores horizontales
-always @(posedge vga_clk) 
-begin
-    if(vcount < 94)
-        h_dat <= 3'h7;   // Blanco
-    else if(vcount < 154)
-        h_dat <= 3'h6;   // Cian
-    else if(vcount < 214)
-        h_dat <= 3'h5;   // Magenta
-    else if(vcount < 274)
-        h_dat <= 3'h4;   // Azul
-    else if(vcount < 334)
-        h_dat <= 3'h3;   // Amarillo
-    else if(vcount < 394)
-        h_dat <= 3'h2;   // Verde
-    else if(vcount < 454)
-        h_dat <= 3'h1;   // Rojo
-    else 
-        h_dat <= 3'h0;   // Negro
-end
-
-endmodule
-
 ```
+- Dependiendo del estado del switch, la pantalla mostrará diferentes patrones:
+- Barras horizontales (h_dat).
+- Barras verticales (v_dat).
+- Patrón de ajedrez (XOR entre v_dat y h_dat).
+- Patrón invertido de ajedrez (XNOR entre v_dat y h_dat)
+
 A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
 
 ```Verilog
