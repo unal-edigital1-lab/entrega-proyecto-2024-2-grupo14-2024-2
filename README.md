@@ -190,7 +190,35 @@ En contraste, el segundo enfoque, aplicado a los puzzles/laberintos, introduce u
  - Permite almacenar múltiples niveles o mapas, haciendo que la implementación de nuevos escenarios sea más flexible y escalable.
 </div>
 
-A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
+### Métodos de Escalamiento y Optimización
+
+En el desarrollo del proyecto, enfrentamos un desafío clave: el almacenamiento y procesamiento de la información gráfica en la FPGA. Para representar una pantalla VGA de 640x480 píxeles con 3 bits de color por píxel (RGB 111), el tamaño total de la memoria requerida sería:
+
+640×480×3 bits=921,600 bits=115,200 bytes≈112.5 KB
+
+Este requerimiento de memoria aumenta la complejidad lógica del juego, por lo que se decide minizar resolución y simplificar su arquitectura.
+
+#### Método de Representación con Macros (define.vh) – Snake
+En el juego de Snake, no se utiliza una memoria externa para almacenar el estado del juego. En su lugar:
+
+ - Las posiciones de la serpiente y la comida se almacenan directamente en la lógica combinacional dentro del módulo game_logic.
+ - El escalamiento se maneja en el archivo define.vh, donde se define una cuadrícula de 40x30 celdas, reduciendo así el número de posiciones que deben ser rastreadas.
+ - Cada celda tiene un tamaño de 16x16 píxeles, lo que disminuye la cantidad de cálculos y almacenamiento.
+
+#### Método de Buffer RAM – Puzzles/Laberintos
+Para los puzzles/laberintos, en lugar de gestionar las posiciones mediante lógica combinacional, se implementó un buffer RAM de doble puerto (buffer_ram_dp). En este método:
+
+ - El escenario del juego se almacena en memoria, lo que permite una mejor manipulación de los niveles.
+
+ - Se accede a la memoria mediante direcciones de lectura y escritura, lo que facilita la actualización de los gráficos en pantalla.
+
+ - La memoria se divide en "celdas", cada una representando un área de 16x16 píxeles, reduciendo el espacio de memoria en un factor de 16:
+
+  640×480 = 40×30 = 1200 celdas
+
+Esto significa que, en lugar de manejar 307,200 bytes de información para 640x480 píxeles en color, solo se requiere 7.5 KB de memoria para manejar la cuadrícula.
+
+A continuación nos centraremos en el módulo fsm_game. Este es el cerebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
 
 ```Verilog
 always @(posedge clk) begin
@@ -221,7 +249,7 @@ always @(posedge clk) begin
 end
 ```
 
-Otra función fundamental del fsm es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_ram se implementó un puerto de lectura exclusivo para FSM, y se programó el bloque que se presentaa continuación:
+Otra función fundamental del módulo es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_ram se implementó un puerto de lectura exclusivo para FSM, y se programó el bloque que se presentaa continuación:
 
 ```Verilog
 always @(posedge clk) begin 
