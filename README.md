@@ -98,7 +98,6 @@ No obstante, el desarrollo del Snake también presentó desafíos. Aunque la ló
 Como primer paso en nuestra investigación, realizamos pruebas para generar señales de video VGA en la FPGA. Para ello, utilizamos repositorios de GitHub como referencia y adaptamos sus implementaciones a nuestro entorno de trabajo[1].
 
 Uno de los primeros aspectos a definir fueron los pulsos de sincronización horizontal y vertical, los cuales son esenciales para que la pantalla pueda interpretar correctamente la imagen enviada por la FPGA. Además, establecimos los parámetros necesarios para definir la resolución de la pantalla en 640x480 píxeles a 60 Hz, asegurándonos de incluir señales adicionales como los porches delantero y trasero, que permiten una transición adecuada entre cada cuadro de imagen.
-
 <br>
 A partir del datasheet de la placa Cyclone IV, identificamos que los canales de color para VGA están limitados a 3 bits de información (1 bit por cada canal RGB: rojo, verde y azul). Esto restringe la paleta de colores a solo 8 combinaciones posibles, lo cual influyó en la forma en que representamos gráficos dentro del juego.
 
@@ -170,6 +169,25 @@ end
 - Barras verticales (v_dat).
 - Patrón de ajedrez (XOR entre v_dat y h_dat).
 - Patrón invertido de ajedrez (XNOR entre v_dat y h_dat)
+
+
+## Caja Negra: Puzzle
+![image](https://github.com/user-attachments/assets/6940fc64-adb2-4e99-82e6-c879d2e89949)
+
+## Caja Negra: Snake
+![image](https://github.com/user-attachments/assets/5283e957-fa67-49de-9f3b-5a07ef45fa43)
+
+#### Diferencias entre Implementaciones
+<div align="justify">
+Durante la investigación y desarrollo del proyecto, exploramos dos enfoques distintos para la gestión del escenario y la lógica de movimiento en la FPGA.
+
+El primer enfoque, utilizado en el juego de Snake, almacena toda la información relevante sobre el estado del juego dentro del módulo game_logic, lo que significa que las posiciones de la serpiente, la manzana y las colisiones se manejan mediante lógica combinacional. Si bien esto simplifica la estructura del diseño al eliminar la necesidad de memoria adicional, incrementa significativamente la cantidad de compuertas lógicas utilizadas en la FPGA, lo que puede afectar el rendimiento y la escalabilidad del sistema.
+
+En contraste, el segundo enfoque, aplicado a los puzzles/laberintos, introduce un buffer RAM para almacenar el escenario del juego. Este buffer RAM permite que la lógica de colisiones y movimiento acceda a los datos mediante lecturas de memoria en lugar de depender de lógica combinacional compleja. Este diseño tiene varias ventajas:
+✔ Reduce el uso de compuertas lógicas en la FPGA, permitiendo un uso más eficiente de los recursos.
+✔ Facilita la manipulación del escenario, ya que los datos pueden actualizarse fácilmente en memoria sin necesidad de modificar la estructura del código principal.
+✔ Permite almacenar múltiples niveles o mapas, haciendo que la implementación de nuevos escenarios sea más flexible y escalable.
+</div>
 
 A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
 
