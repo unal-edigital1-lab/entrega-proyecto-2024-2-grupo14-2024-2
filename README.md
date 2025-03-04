@@ -237,7 +237,7 @@ end
 endmodule
 
 ```
-A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del talbero es de 40. 
+A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
 
 ```Verilog
 always @(posedge clk) begin
@@ -268,7 +268,7 @@ always @(posedge clk) begin
 end
 ```
 
-Otra función fundamental del fsm es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_RAM se implementó un módulo de lectura exclusivo para FSM.
+Otra función fundamental del fsm es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_ram se implementó un puerto de lectura exclusivo para FSM, y se programó el bloque que se presentaa continuación:
 
 ```Verilog
 always @(posedge clk) begin 
@@ -283,6 +283,25 @@ always @(posedge clk) begin
     end
 end
 ```
+En este se guarda la posición a la que el jugador desea moverse. Esta se comprueba en la ram, y si está ocupada, el condicional necesario para modificar el parámetro pos no se cumplirá. 
+
+```Verilog
+always @(posedge clk_game) begin 
+    if (move_down && (pos_y < LIMITE_Y_MAX) && (mem_px_read_data == 3'b000) && !move_right && !move_left && !move_up) begin 
+        pos_y <= pos_y + 1;
+    end
+    if (move_up && (pos_y > LIMITE_Y_MIN) && (mem_px_read_data == 3'b000) && !move_right && !move_left && !move_down) begin 
+        pos_y <= pos_y - 1;
+    end
+    if (move_right && (pos_x < LIMITE_X_MAX) && (mem_px_read_data == 3'b000) && !move_up && !move_down && !move_left) begin 
+        pos_x <= pos_x + 1;
+    end
+    if (move_left && (pos_x > LIMITE_X_MIN) && (mem_px_read_data == 3'b000) && !move_up && !move_down && !move_right) begin 
+        pos_x <= pos_x - 1;
+    end
+end
+```
+También es importante mencionar que se observó que al presionar varios botones al tiempo o rápidamente se rompia el condiciional permitiendo al jugador atravesar paredes en rápida sucesión. Por esto fue necesario agregar la condición de que todas las demás entradas de movimiento debían estar en 0. 
 ## Referencias
 
 - [1] FPGA Cyclone IV - Conector VGA. (2024, July 16). parsek.com.co. (https://parsek.com.co/blogs/fpga-cyclone-iv-conector-vga)
