@@ -11,7 +11,6 @@ Para aplicar estos conocimientos, se planteó inicialmente la recreación de un 
 El objetivo principal es resolver los retos que presenta la programación de videojuegos en un lenguaje de bajo nivel, abarcando aspectos como el procesamiento de señales VGA, la creación de registros de memoria RAM y la implementación de lógica combinacional para las mecánicas de movimiento. Además, se integran otros componentes, como botones y switches, para permitir la interacción del usuario con el juego en tiempo real.
 </div>
 
-
 ## Componentes Interactivos
 - Switch: Funcionará como un interruptor de encendido, al estar en el estado 1, permitirá la transmisión de la señal VGA.
 - Botones: Asociados al movimiento del cuadro, permite al usuario moverse por 4 direcciones.
@@ -23,7 +22,6 @@ A lo largo del desarrollo del proyecto, nos enfrentamos a diversas dificultades 
 <br> 
 No obstante, el desarrollo del Snake también presentó desafíos. Aunque la lógica del juego parecía estar bien estructurada, la primera versión del movimiento utilizaba un método de sincronización y actualización de reloj sin requerir memoria RAM, lo que afectaba la interacción y fluidez del juego. Para abordar este problema y comprender mejor las mecánicas de movimiento, realizamos pruebas con puzles tipo laberinto, donde desarrollamos una interfaz gráfica basada en un buffer RAM y diseñamos la lógica de colisiones y desplazamiento.
 </div>
-
 
 ### Lógica del Juego
 
@@ -97,11 +95,10 @@ No obstante, el desarrollo del Snake también presentó desafíos. Aunque la ló
 
 # Pruebas Iniciales VGA
 <div align="justify">
-Pruebas iniciales en VGA
-
 Como primer paso en nuestra investigación, realizamos pruebas para generar señales de video VGA en la FPGA. Para ello, utilizamos repositorios de GitHub como referencia y adaptamos sus implementaciones a nuestro entorno de trabajo[1].
 
 Uno de los primeros aspectos a definir fueron los pulsos de sincronización horizontal y vertical, los cuales son esenciales para que la pantalla pueda interpretar correctamente la imagen enviada por la FPGA. Además, establecimos los parámetros necesarios para definir la resolución de la pantalla en 640x480 píxeles a 60 Hz, asegurándonos de incluir señales adicionales como los porches delantero y trasero, que permiten una transición adecuada entre cada cuadro de imagen.
+
 <br>
 A partir del datasheet de la placa Cyclone IV, identificamos que los canales de color para VGA están limitados a 3 bits de información (1 bit por cada canal RGB: rojo, verde y azul). Esto restringe la paleta de colores a solo 8 combinaciones posibles, lo cual influyó en la forma en que representamos gráficos dentro del juego.
 
