@@ -7,8 +7,7 @@ Como etapa final del curso Electrónica Digital I, este proyecto busca desafiar 
 
 Para aplicar estos conocimientos, se planteó inicialmente la recreación de un juego retro en la placa Cyclone IV.
 
-<br><br>
-
+<br>
 El objetivo principal es resolver los retos que presenta la programación de videojuegos en un lenguaje de bajo nivel, abarcando aspectos como el procesamiento de señales VGA, la creación de registros de memoria RAM y la implementación de lógica combinacional para las mecánicas de movimiento. Además, se integran otros componentes, como botones y switches, para permitir la interacción del usuario con el juego en tiempo real.
 </div>
 
