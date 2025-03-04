@@ -1,6 +1,8 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=17800725&assignment_repo_type=AssignmentRepo)
 # Entrega del Proyecto WP01
-
+- Juan David Saldaña Estupiñan
+- Diego José Navarro López
+- Daniel Alberto Rodríguez Porras
 ## Introducción
 <div align="justify">
 Como etapa final del curso Electrónica Digital I, este proyecto busca desafiar y poner a prueba nuestros conocimientos en la integración de fundamentos y aplicaciones avanzadas de la electrónica digital. Se abordan temas clave como el diseño e implementación de circuitos secuenciales y combinacionales, máquinas de estados algorítmicas, uso de entornos de simulación y programación en Verilog. 
