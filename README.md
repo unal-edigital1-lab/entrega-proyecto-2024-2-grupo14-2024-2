@@ -1,20 +1,11 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=17800725&assignment_repo_type=AssignmentRepo)
-# Entrega 1 del Proyecto WP01
+# Entrega del Proyecto WP01
 
 ## Introducción
-
-El proyecto consiste en el diseño e implementación del juego clásico Snake utilizando una FPGA. Este proyecto tiene como objetivo combinar el aprendizaje de lógica digital, diseño hardware y generación de gráficos en tiempo real. La FPGA se encargará de gestionar la lógica del juego, renderizar los gráficos y recibir entradas del usuario.
-
-## Objetivos
-
-- Implementar la lógica del juego de Snake (generación de la serpiente y las manzanas, movimiento, rotación y colisiones).
-
-- Diseñar una interfaz gráfica sencilla utilizando una salida VGA.
-
-- Permitir la interacción del usuario mediante botones.
-
-- Implementar un contador de puntaje.
-
+<div align="justify">
+Como etapa final del curso Electrónica Digital I, se busca desafíar y probar nuestros conocimientos en la integración de los fundamentos y aplicaciones avanzadas en sistemas de electrónica digital. Se abarcan temas claves como, diseño e implementación de circuitos secuenciales y combinacionales, máquinas de estados algorítmos, uso de entornos de simulación y programación de Hardaware en Verilog. Es así, como para la aplicación de estos conocimientos, se planteó en un inicio la recreación de un juego retro con la placa Cyclone IV.
+Como objetivo principal, es dar solución a los retos que presenta la programación de videjuegos en un lenguaje de programación de bajo nivel. Como el procesamiento de señales en VGA, creación de registros de memoria RAM y lógica combinacional para mecánicas de movimiento. Además, se integran otros componentes, como botones y switches para dar al usuario una interacción con el juego en tiempo de ejecución.
+</div>
 ## Especificaciones del Proyecto
 
 ### Lógica del Juego
