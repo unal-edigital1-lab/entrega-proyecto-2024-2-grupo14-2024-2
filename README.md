@@ -866,26 +866,56 @@ end
 - Patrón invertido de ajedrez (XNOR entre v_dat y h_dat)
 
 
-## Caja Negra: Puzzle
-![image](https://github.com/user-attachments/assets/6940fc64-adb2-4e99-82e6-c879d2e89949)
-
 ## Caja Negra: Snake
 ![image](https://github.com/user-attachments/assets/5283e957-fa67-49de-9f3b-5a07ef45fa43)
 
-#### Diferencias entre Implementaciones
-<div align="justify">
-Durante la investigación y desarrollo del proyecto, exploramos dos enfoques distintos para la gestión del escenario y la lógica de movimiento en la FPGA.
 
-El primer enfoque, utilizado en el juego de Snake, almacena toda la información relevante sobre el estado del juego dentro del módulo game_logic, lo que significa que las posiciones de la serpiente, la manzana y las colisiones se manejan mediante lógica combinacional. Si bien esto simplifica la estructura del diseño al eliminar la necesidad de memoria adicional, incrementa significativamente la cantidad de compuertas lógicas utilizadas en la FPGA, lo que puede afectar el rendimiento y la escalabilidad del sistema.
+Ahora pasaremos al juego de laberinto implementado.
 
-En contraste, el segundo enfoque, aplicado a los puzzles/laberintos, introduce un buffer RAM para almacenar el escenario del juego. Este buffer RAM permite que la lógica de colisiones y movimiento acceda a los datos mediante lecturas de memoria en lugar de depender de lógica combinacional compleja. Este diseño tiene varias ventajas:
+## Caja Negra: Laberinto
+![image](https://github.com/user-attachments/assets/6940fc64-adb2-4e99-82e6-c879d2e89949)
 
- - Reduce el uso de compuertas lógicas en la FPGA, permitiendo un uso más eficiente de los recursos.
- - Facilita la manipulación del escenario, ya que los datos pueden actualizarse fácilmente en memoria sin necesidad de modificar la estructura del código principal.
- - Permite almacenar múltiples niveles o mapas, haciendo que la implementación de nuevos escenarios sea más flexible y escalable.
-</div>
+Al proyectar en una pantalla VGA de 640X480 pixeles, y dado que cada pixel guarda 3 Bits, se requerirían 921600 bits para proyectar en todo el espacio y resolución disponibles. Considerando las limitaciones de memoria de la FPGA, se abordó el problema proponiendo un escalamiento por un factor de 16, quedando con una matriz de 40x30. Por 3 bits, esto reduce la memoria a tan solo 3600 bits. Este escalamiento se puede observar en el módulo test_VGA.
 
-A continuación nos centraremos en el módulo fsm_game. Este es el crebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
+```Verilog
+reg [AW-1:0] countx;
+reg [AW-1:0] county;
+
+localparam px_scale = 16;
+localparam width = CAM_SCREEN_X/px_scale;
+localparam height = CAM_SCREEN_Y/px_scale;
+
+always @ (VGA_posX, VGA_posY) begin
+	
+	if(rst) begin
+		countx=0;
+		county=0;
+	end
+	
+	countx=VGA_posX/px_scale;
+	if(countx>=width) 
+		countx = 0;
+	
+	county=VGA_posY/px_scale;
+	if(county>=height) 
+		county = 0;
+	
+	DP_RAM_addr_out = countx+county*width;
+	
+end
+	
+initial begin
+	countx=0;
+	county=0;
+end
+
+```
+Esta matriz se guarda en una memoria ram, para la cual se definen un puerto de escritura, y dos de lectura. Un puerto de lectura y escritura se conecta al módulo fsm_game, puesto que en este se almacena la lógica principal del juego y el movimiento del jugador. El otro puerto de lectura se coencta al módulo VGA_driver. 
+
+![buffer](https://github.com/user-attachments/assets/fb3f1e21-bcf5-4ad0-b074-88def9dde968)
+
+
+A continuación nos centraremos en el módulo fsm_game. Este es el cerebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
 
 ```Verilog
 always @(posedge clk) begin
@@ -950,6 +980,21 @@ always @(posedge clk_game) begin
 end
 ```
 También es importante mencionar que se observó que al presionar varios botones al tiempo o rápidamente se rompía el condicional permitiendo al jugador atravesar paredes en rápida sucesión. Por esto fue necesario agregar la condición de que todas las demás entradas de movimiento debían estar en 0. 
+
+#### Diferencias entre Implementaciones
+<div align="justify">
+Durante la investigación y desarrollo del proyecto, exploramos dos enfoques distintos para la gestión del escenario y la lógica de movimiento en la FPGA.
+
+El primer enfoque, utilizado en el juego de Snake, almacena toda la información relevante sobre el estado del juego dentro del módulo game_logic, lo que significa que las posiciones de la serpiente, la manzana y las colisiones se manejan mediante lógica combinacional. Si bien esto simplifica la estructura del diseño al eliminar la necesidad de memoria adicional, incrementa significativamente la cantidad de compuertas lógicas utilizadas en la FPGA, lo que puede afectar el rendimiento y la escalabilidad del sistema.
+
+En contraste, el segundo enfoque, aplicado a los puzzles/laberintos, introduce un buffer RAM para almacenar el escenario del juego. Este buffer RAM permite que la lógica de colisiones y movimiento acceda a los datos mediante lecturas de memoria en lugar de depender de lógica combinacional compleja. Este diseño tiene varias ventajas:
+
+ - Reduce el uso de compuertas lógicas en la FPGA, permitiendo un uso más eficiente de los recursos.
+ - Facilita la manipulación del escenario, ya que los datos pueden actualizarse fácilmente en memoria sin necesidad de modificar la estructura del código principal.
+ - Permite almacenar múltiples niveles o mapas, haciendo que la implementación de nuevos escenarios sea más flexible y escalable.
+</div>
+
+
 ## Referencias
 
 - [1] FPGA Cyclone IV - Conector VGA. (2024, July 16). parsek.com.co. (https://parsek.com.co/blogs/fpga-cyclone-iv-conector-vga)
