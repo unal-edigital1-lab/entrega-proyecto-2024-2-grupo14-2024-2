@@ -925,10 +925,11 @@ initial begin
 end
 
 ```
-Por ejemplo, a continuación se presenta el archivo precargado:
+Por ejemplo, a continuación se presenta el archivo precargado y su visualización en la VGA:
 
 ![image](https://github.com/user-attachments/assets/4f76b567-fb03-4e37-9b1c-08655a8dbfbb)
 
+![pantalla lab](https://github.com/user-attachments/assets/e1f61a41-f55b-4e89-92d2-abc83a4699e9)
 
 
 
