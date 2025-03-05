@@ -914,7 +914,7 @@ Esta matriz se guarda en una memoria ram, para la cual se definen un puerto de e
 
 ![buffer](https://github.com/user-attachments/assets/fb3f1e21-bcf5-4ad0-b074-88def9dde968)
 
-Además es importante mencionar que una vez creada la memoria RAM es posible en el móudlo del buffer al momento de iniciar el programa cargar archivos predefinidos en archivos txt. Esto permite cargar escenarios predefinidos con facilidad y se empleó para generar el laberinto.
+Además es importante mencionar que una vez creada la memoria RAM es posible en el módulo del buffer al momento de iniciar el programa cargar archivos predefinidos en archivos txt. Esto permite cargar escenarios predefinidos con facilidad y se empleó para generar el laberinto.
 
 ```Verilog
 
