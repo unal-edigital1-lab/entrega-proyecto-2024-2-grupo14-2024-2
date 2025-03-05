@@ -925,8 +925,16 @@ initial begin
 end
 
 ```
+Por ejemplo, a continuación se presenta el archivo precargado:
+
+![image](https://github.com/user-attachments/assets/4f76b567-fb03-4e37-9b1c-08655a8dbfbb)
+
+
+
 
 A continuación nos centraremos en el módulo fsm_game. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
+
+![fsm](https://github.com/user-attachments/assets/4619770e-c525-40d2-b76f-ad65607b8eff)
 
 ```Verilog
        
