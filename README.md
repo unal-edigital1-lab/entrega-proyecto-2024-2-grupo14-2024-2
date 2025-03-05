@@ -910,22 +910,26 @@ initial begin
 end
 
 ```
-Esta matriz se guarda en una memoria ram, para la cual se definen un puerto de escritura, y dos de lectura. Un puerto de lectura y escritura se conecta al módulo fsm_game, puesto que en este se almacena la lógica principal del juego y el movimiento del jugador. El otro puerto de lectura se coencta al módulo VGA_driver. 
+Esta matriz se guarda en una memoria ram, para la cual se definen un puerto de escritura, y dos de lectura. Un puerto de lectura y escritura se conecta al módulo fsm_game, puesto que en este se almacena la lógica principal del juego y el movimiento del jugador. El otro puerto de lectura se conecta al módulo VGA_driver, encargado de comunicarse con la pantalla en sí. 
 
 ![buffer](https://github.com/user-attachments/assets/fb3f1e21-bcf5-4ad0-b074-88def9dde968)
 
-
-A continuación nos centraremos en el módulo fsm_game. Este es el cerebro detrás de todo el funcionamiento del juego. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
+Además es importante mencionar que una vez creada la memoria RAM es posible en el móudlo del buffer al momento de iniciar el programa cargar archivos predefinidos en archivos txt. Esto permite cargar escenarios predefinidos con facilidad y se empleó para generar el laberinto.
 
 ```Verilog
-always @(posedge clk) begin
-    if (rst) begin
-        px_wr <= 0;
-        fase_dibujo <= 0;  
-    end else if (((pos_x != pos_old_x) || (pos_y != pos_old_y)) &&
-                 (pos_x >= LIMITE_X_MIN) && (pos_x <= LIMITE_X_MAX) &&
-                 (pos_y >= LIMITE_Y_MIN) && (pos_y <= LIMITE_Y_MAX)) begin
-        
+
+parameter imageFILE="D:/DIGITAL 2/2024_2_Grupo 14/VGA/ejem2.txt"
+
+initial begin
+    $readmemb(imageFILE, ram);
+end
+
+```
+
+A continuación nos centraremos en el módulo fsm_game. Primeramente, se tienen dos estados básicos para definir el movimiento del jugador: Cambiar a una nueva posición en la matriz, pintandola de su color, y volviendo a definir la casilla anterior como negra. Para definir la posición exacta a la que el jugador desea moverse, o conocer su ubicación en la matrix 40x30 se emplea la fórmula  pos_x + (pos_y * ANCHO_TABLERO) , donde el ancho del tablero es de 40. 
+
+```Verilog
+       
         if (fase_dibujo == 0) begin
             // Borra la posición anterior
             mem_px_addr <= pos_old_x + (pos_old_y * ANCHO_TABLERO);
@@ -939,14 +943,10 @@ always @(posedge clk) begin
             pos_old_y <= pos_y;
             fase_dibujo <= 0;  
         end
-        px_wr <= 1;  
-    end else begin
-        px_wr <= 0;
-    end
 end
 ```
 
-Otra función fundamental del fsm es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_ram se implementó un puerto de lectura exclusivo para FSM, y se programó el bloque que se presentaa continuación:
+Otra función fundamental del fsm es definir las "colisiones". Ya que el laberinto se carga desde un archivo de texto, en vez de crear objetos para representar las paredes sale más rentable antes de moverse leer la memoria ram para averiguar que color se encuentra en la casilla de destino. Si no es el que se definió para camino depejado, la posición en esa dirección no podrá cambiar más. Para esto en el módulo buffer_ram se implementó un puerto de lectura exclusivo para FSM, y se programó el bloque que se presenta a continuación:
 
 ```Verilog
 always @(posedge clk) begin 
